@@ -1,7 +1,7 @@
 import { env } from 'bun'
 import { Hono } from 'hono'
 import { parse } from 'ini'
-import { kDNS, kRuleSet, kRules, kSetting, kSurgeConfig } from './config'
+import { kDNS, kManualProxy, kRuleSet, kRules, kSetting, kSurgeConfig } from './config'
 
 const app = new Hono()
 
@@ -13,9 +13,12 @@ const downloadConfig = async (url: string): Promise<string> => {
   return data
 }
 
-const parseConfig = (config: string): string => {
+const parseConfig = (config: string): Record<string, string> => {
   let resp = parse(config)
   let proxy = resp["Proxy"]
+  if (!proxy) {
+    return {}
+  }
   delete proxy["Direct"]
   return proxy
 }
@@ -107,7 +110,7 @@ app.get('/surge.conf', async (c) => {
   let r = `#!MANAGED-CONFIG http://${env.HOSTNAME}:${env.PORT}/surge.conf interval=43200\n`
   r += _buildSetting()
   let configs = await downloadConfigs()
-  let proxy: string[][] = []
+  let proxy: string[][] = [...kManualProxy]
   for (let [name, config] of configs) {
     for (let [key, value] of Object.entries(config)) {
       proxy.push([`${name}-${key}`, value])

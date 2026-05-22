@@ -2,6 +2,10 @@ const kSurgeConfig = [
     //["NAME", "CONFIG_URL"], 
 ]
 
+const kManualProxy = [
+    //["NAME", "PROXY_CONFIG"],
+]
+
 const kRuleSet = {
     "Apple": {
         "url": [
@@ -102,5 +106,4 @@ const kSetting = {
 const kDNS = [
     //[domain, ip]
 ];
-export { kDNS, kRuleSet, kRules, kSetting, kSurgeConfig };
-
+export { kDNS, kManualProxy, kRuleSet, kRules, kSetting, kSurgeConfig };

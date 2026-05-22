@@ -1,6 +1,5 @@
-import { env } from 'bun'
 import { Hono } from 'hono'
-import { kDNS, kManualProxy, kRuleSet, kRules, kSetting, kSurgeConfig } from './config'
+import { kDNS, kManualProxy, kRuleSet, kRules, kServer, kSetting, kSurgeConfig } from './config'
 
 const app = new Hono()
 
@@ -144,8 +143,8 @@ const _buildDNS = (hosts: ConfigSection): string => {
   return result;
 }
 
-app.get('/surge.conf', async (c) => {
-  let r = `#!MANAGED-CONFIG http://${env.HOSTNAME}:${env.PORT}/surge.conf interval=43200\n`
+app.get(kServer.path, async (c) => {
+  let r = `#!MANAGED-CONFIG ${kServer.managedConfigUrl} interval=43200\n`
   r += _buildSetting()
   let configs = await downloadConfigs()
   let proxy: string[][] = [...kManualProxy]
@@ -166,7 +165,7 @@ app.get('/surge.conf', async (c) => {
 })
 
 export default {
-  port: env.PORT,
+  port: kServer.port,
   fetch: app.fetch,
-  hostname: env.HOSTNAME
+  hostname: kServer.hostname
 } 

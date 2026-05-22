@@ -6,6 +6,13 @@ const kManualProxy = [
     //["NAME", "PROXY_CONFIG"],
 ]
 
+const kServer = {
+    hostname: "0.0.0.0",
+    port: 3000,
+    path: "/surge.conf",
+    managedConfigUrl: "http://127.0.0.1:3000/surge.conf",
+}
+
 const kRuleSet = {
     "Apple": {
         "url": [
@@ -110,4 +117,4 @@ const kSetting = {
 const kDNS = [
     //[domain, ip]
 ];
-export { kDNS, kManualProxy, kRuleSet, kRules, kSetting, kSurgeConfig };
+export { kDNS, kManualProxy, kRuleSet, kRules, kServer, kSetting, kSurgeConfig };

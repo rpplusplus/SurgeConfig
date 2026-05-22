@@ -1,5 +1,5 @@
 const kSurgeConfig = [
-    //["NAME", "CONFIG_URL"], 
+    //["NAME", "CONFIG_URL"],
 ]
 
 const kManualProxy = [
@@ -64,6 +64,10 @@ const kRuleSet = {
     "ChinaIP": {
         "url": ["https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/ChinaIPs/ChinaIPs.list"],
         "type": "direct"
+    },
+    "SteamCN": {
+        "url": ["https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/SteamCN/SteamCN.list"],
+        "type": "direct"
     }
 }
 
@@ -81,7 +85,7 @@ const kSetting = {
     "General": {
         "http-listen": "0.0.0.0:8888",
         "socks5-listen": "0.0.0.0:8889",
-        "external-controller-access": "yourpassword@0.0.0.0:6170",//password
+        "external-controller-access": "yourpassword@0.0.0.0:6170",
         "internet-test-url": "http://www.gstatic.com/generate_204",
         "proxy-test-url": "http://www.gstatic.com/generate_204",
         "test-timeout": "3",

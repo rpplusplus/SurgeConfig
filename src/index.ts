@@ -1,9 +1,15 @@
 import { env } from 'bun'
 import { Hono } from 'hono'
-import { parse } from 'ini'
 import { kDNS, kManualProxy, kRuleSet, kRules, kSetting, kSurgeConfig } from './config'
 
 const app = new Hono()
+
+type ConfigSection = string[][]
+
+type ParsedConfig = {
+  proxy: ConfigSection
+  host: ConfigSection
+}
 
 const downloadConfig = async (url: string): Promise<string> => {
   console.log(`Downloading ${url}`)
@@ -13,19 +19,51 @@ const downloadConfig = async (url: string): Promise<string> => {
   return data
 }
 
-const parseConfig = (config: string): Record<string, string> => {
-  let resp = parse(config)
-  let proxy = resp["Proxy"]
-  if (!proxy) {
-    return {}
+const parseSection = (config: string, sectionName: string): ConfigSection => {
+  let result: ConfigSection = []
+  let currentSection = ""
+
+  for (let line of config.split(/\r?\n/)) {
+    let trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith(";")) {
+      continue
+    }
+
+    let section = trimmed.match(/^\[(.+)\]$/)
+    if (section) {
+      currentSection = section[1]
+      continue
+    }
+
+    if (currentSection !== sectionName) {
+      continue
+    }
+
+    let separatorIndex = line.indexOf("=")
+    if (separatorIndex < 0) {
+      continue
+    }
+
+    let key = line.slice(0, separatorIndex).trim()
+    let value = line.slice(separatorIndex + 1).trim()
+    if (key) {
+      result.push([key, value])
+    }
   }
-  delete proxy["Direct"]
-  return proxy
+
+  return result
 }
 
-const downloadConfigs = async () => {
+const parseConfig = (config: string): ParsedConfig => {
+  return {
+    proxy: parseSection(config, "Proxy").filter(([name]) => name.toLowerCase() !== "direct"),
+    host: parseSection(config, "Host"),
+  }
+}
+
+const downloadConfigs = async (): Promise<[string, ParsedConfig][]> => {
   let resp = await Promise.all(kSurgeConfig.map(async ([name, url]) => {
-    return [name, parseConfig(await downloadConfig(url))]
+    return [name, parseConfig(await downloadConfig(url))] as [string, ParsedConfig]
   }))
 
   return resp
@@ -96,10 +134,10 @@ const _buildRules = (): string => {
   return result
 }
 
-const _buildDNS = (): string => {
+const _buildDNS = (hosts: ConfigSection): string => {
   let result = "[Host]\n"
 
-  for (let [domain, ip] of kDNS) {
+  for (let [domain, ip] of hosts) {
     result += `${domain} = ${ip}\n`
   }
 
@@ -111,17 +149,19 @@ app.get('/surge.conf', async (c) => {
   r += _buildSetting()
   let configs = await downloadConfigs()
   let proxy: string[][] = [...kManualProxy]
+  let hosts: string[][] = [...kDNS]
   for (let [name, config] of configs) {
-    for (let [key, value] of Object.entries(config)) {
+    for (let [key, value] of config.proxy) {
       proxy.push([`${name}-${key}`, value])
     }
+    hosts.push(...config.host)
   }
 
   r += _buildProxy(proxy)
   let proxyNames = proxy.map((x) => x[0])
   r += _buildProxyGroup(proxyNames)
   r += _buildRules()
-  r += _buildDNS()
+  r += _buildDNS(hosts)
   return c.text(r);
 })
 

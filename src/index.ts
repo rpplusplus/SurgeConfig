@@ -144,7 +144,7 @@ const _buildDNS = (hosts: ConfigSection): string => {
 }
 
 app.get(kServer.path, async (c) => {
-  let r = `#!MANAGED-CONFIG ${kServer.managedConfigUrl} interval=43200\n`
+  let r = `#!MANAGED-CONFIG ${kServer.publicOrigin}${kServer.path} interval=43200\n`
   r += _buildSetting()
   let configs = await downloadConfigs()
   let proxy: string[][] = [...kManualProxy]

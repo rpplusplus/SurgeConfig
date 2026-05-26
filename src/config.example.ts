@@ -9,8 +9,8 @@ const kManualProxy = [
 const kServer = {
     hostname: "0.0.0.0",
     port: 3000,
+    publicOrigin: "http://127.0.0.1:3000",
     path: "/surge.conf",
-    managedConfigUrl: "http://127.0.0.1:3000/surge.conf",
 }
 
 const kRuleSet = {

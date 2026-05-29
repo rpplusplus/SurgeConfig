@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { kDNS, kManualProxy, kRuleSet, kRules, kServer, kSetting, kSurgeConfig } from './config'
+import { kDNS, kMITM, kManualProxy, kRuleSet, kRules, kServer, kSetting, kSurgeConfig } from './config'
 
 const app = new Hono()
 
@@ -83,6 +83,22 @@ const _buildSetting = (): string => {
   return result
 }
 
+const _buildMITM = (): string => {
+  let result = ""
+  let mitm: any = kMITM
+  let keys = Object.keys(mitm).filter((key) => mitm[key] !== undefined && mitm[key] !== "")
+  if (keys.length === 0) {
+    return result
+  }
+
+  result += "[MITM]\n"
+  for (let key of keys) {
+    result += `${key} = ${mitm[key]}\n`
+  }
+  result += "\n"
+  return result
+}
+
 const _buildProxy = (proxy: string[][]): string => {
   let result = "[Proxy]\n"
   result += "Direct = direct\n"
@@ -146,6 +162,7 @@ const _buildDNS = (hosts: ConfigSection): string => {
 app.get(kServer.path, async (c) => {
   let r = `#!MANAGED-CONFIG ${kServer.publicOrigin}${kServer.path} interval=43200\n`
   r += _buildSetting()
+  r += _buildMITM()
   let configs = await downloadConfigs()
   let proxy: string[][] = [...kManualProxy]
   let hosts: string[][] = [...kDNS]

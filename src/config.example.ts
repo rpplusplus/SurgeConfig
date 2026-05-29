@@ -114,7 +114,17 @@ const kSetting = {
     },
 }
 
+const kMITM = {
+    //"ca-p12": "BASE64_ENCODED_PKCS12_CERT",
+    //"ca-passphrase": "password",
+    //"hostname": "-*.apple.com, -*.icloud.com, *",
+    //"h2": "true",
+    //"skip-server-cert-verify": "false",
+    //"client-source-address": "0.0.0.0/0, ::/0",
+    //"auto-quic-block": "true",
+}
+
 const kDNS = [
     //[domain, ip]
 ];
-export { kDNS, kManualProxy, kRuleSet, kRules, kServer, kSetting, kSurgeConfig };
+export { kDNS, kMITM, kManualProxy, kRuleSet, kRules, kServer, kSetting, kSurgeConfig };
